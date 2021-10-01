@@ -1,7 +1,52 @@
 'use strict'
-
 const admin = require('../config/firebase-config')
 const firestore = admin.firestore()
+
+const saveUser = async (req, res) => {
+  try {
+    const adminsQueryDocument = await firestore.collection("admins").doc('admins').get()
+    const admins = await adminsQueryDocument.data().admin
+    const token = await req.cookies.token
+    const decodeValue = await admin.auth().verifyIdToken(token)
+    const userId = decodeValue.uid
+
+    const newAdmin = admins.filter(item => item.email === decodeValue.email)
+    if (newAdmin[0]) {
+      if (newAdmin[0].email === decodeValue.email) {
+        decodeValue["roles"] = ["user", "admin"]
+      }
+    } else decodeValue["roles"] = ["user"]
+    await firestore.collection("usersData").doc(userId).set(decodeValue)
+    return res.json(decodeValue)
+  } catch (e) {
+    return res.json({message: 'Internal Error'})
+  }
+}
+
+
+const fetchCategories = async (req, res) => {
+  try {
+    const catalog = await firestore.collection("productsCategory").doc('categories')
+    const data = await catalog.get()
+
+    if (!data.exists) {
+      res.status(404).send('Categories not found')
+    } else {
+      res.send(data.data())
+    }
+
+  } catch (error) {
+    res.status(400).send(error.message)
+  }
+}
+
+module.exports = {
+  saveUser,
+  fetchCategories
+}
+
+
+
 
 // const updatePhotos = async (req, res) => {
 //   try {
@@ -59,48 +104,7 @@ const firestore = admin.firestore()
 //   }
 // }
 
-const sessionLogin = async (req, res) => {
-  const token = await req.headers.token.toString();
-  const expiresIn = 60 * 60 * 24 * 5 * 1000;
 
-  admin
-      .auth()
-      .createSessionCookie(token, {expiresIn})
-      .then(
-          (sessionCookie) => {
-            // Set cookie policy for session cookie.
-            const options = {maxAge: expiresIn, httpOnly: true, secure: true};
-            res.cookie('session', sessionCookie, options);
-            res.end(JSON.stringify({status: 'success'}));
-          },
-          (error) => {
-            res.status(401).send('UNAUTHORIZED REQUEST!');
-          }
-      )
-}
-
-const saveUser = async (req, res) => {
-
-  console.log(req.cookies)
-  try {
-    const adminsQueryDocument = await firestore.collection("admins").doc('admins').get()
-    const admins = await adminsQueryDocument.data().admin
-    const token = await req.headers.token
-    const decodeValue = await admin.auth().verifyIdToken(token)
-    const userId = decodeValue.uid
-
-    const newAdmin = admins.filter(item => item.email === decodeValue.email)
-    if (newAdmin[0]) {
-      if (newAdmin[0].email === decodeValue.email) {
-        decodeValue["roles"] = ["user", "admin"]
-      }
-    } else decodeValue["roles"] = ["user"]
-    await firestore.collection("usersData").doc(userId).set(decodeValue)
-    return res.json(decodeValue)
-  } catch (e) {
-    return res.json({message: 'Internal Error'})
-  }
-}
 
 // const fetchReviews = async (req, res) => {
 //   try {
@@ -128,13 +132,3 @@ const saveUser = async (req, res) => {
 //   }
 // }
 
-module.exports = {
-  // updatePhotos,
-  // fetchPhoto,
-  // updateVideos,
-  // fetchVideo,
-  saveUser,
-  sessionLogin,
-  // fetchReviews,
-  // updateReviews
-}
