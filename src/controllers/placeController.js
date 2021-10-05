@@ -40,9 +40,42 @@ const fetchCategories = async (req, res) => {
   }
 }
 
+const addNewAuction = async (req, res) => {
+  try {
+    const fetchAuctions = await firestore.collection("auctionsData").doc('auctions')
+    const auctionsData = await fetchAuctions.get()
+    const auctions = auctionsData.data()
+    const data = req.body.data
+    auctions['auctions'].push(data)
+    await firestore.collection('auctionsData').doc('auctions').set(auctions)
+    res.send('Auction saved successfuly')
+  } catch (error) {
+    res.status(400).send(error.message)
+  }
+}
+
+const loadAuctions = async (req, res) => {
+  try {
+    const catalog = await firestore.collection("auctionsData").doc('auctions')
+    const data = await catalog.get()
+
+    if (!data.exists) {
+      res.status(404).send('Auctions not found')
+    } else {
+      res.send(data.data())
+    }
+
+  } catch (error) {
+    res.status(400).send(error.message)
+  }
+}
+
+
 module.exports = {
   saveUser,
-  fetchCategories
+  fetchCategories,
+  addNewAuction,
+  loadAuctions
 }
 
 

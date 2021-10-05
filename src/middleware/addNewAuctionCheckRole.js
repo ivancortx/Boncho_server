@@ -1,10 +1,10 @@
 const admin = require('../config/firebase-config')
 const firestore = admin.firestore()
 
-const updateContentCheckRole = async(req, res, next) => {
+const addNewAuctionCheckRole = async(req, res, next) => {
   const adminsQueryDocument = await firestore.collection("admins").doc('admins').get()
   const admins = await adminsQueryDocument.data().admin
-  const token = await req.headers.token
+  const token = await req.cookies.token
 
   admin
       .auth()
@@ -23,7 +23,7 @@ const updateContentCheckRole = async(req, res, next) => {
       });
 }
 
-module.exports = updateContentCheckRole
+module.exports = addNewAuctionCheckRole
 
 
 

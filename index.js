@@ -3,7 +3,7 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 const placeRoutes = require('./src/routes/routes')
 const cookieParser = require('cookie-parser')
-// const updateContentCheckRole = require('./src/middleware/updateContentCheckRole')
+const addNewAuctionCheckRole = require('./src/middleware/addNewAuctionCheckRole')
 require("dotenv").config()
 
 // const addReviewCheckRole = require('./src/middleware/addReviewCheckRole')
@@ -19,7 +19,7 @@ app.use(cookieParser())
 
 
 
-// app.post('/api/add-photo', updateContentCheckRole)
+app.post('api/add-auction', addNewAuctionCheckRole)
 // app.post('/api/add-video', updateContentCheckRole)
 // app.post('/api/add-review', addReviewCheckRole)
 
