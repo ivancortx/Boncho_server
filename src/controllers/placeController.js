@@ -70,12 +70,31 @@ const loadAuctions = async (req, res) => {
   }
 }
 
+const fetchProduct = async (req, res) => {
+  try {
+    const productId = req.params.auctionId
+    const catalog = await firestore.collection("auctionsData").doc('auctions')
+    const data = await catalog.get()
+    const productsArray = data.data().auctions
+    const productData = productsArray.filter(product => product.auctionId === productId)
+
+    if (!productData) {
+      res.status(404).send('Product not found')
+    } else {
+      res.send(productData)
+    }
+
+  } catch (error) {
+    res.status(400).send(error.message)
+  }
+}
 
 module.exports = {
   saveUser,
   fetchCategories,
   addNewAuction,
-  loadAuctions
+  loadAuctions,
+  fetchProduct
 }
 
 
