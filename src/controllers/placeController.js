@@ -46,8 +46,10 @@ const addNewAuction = async (req, res) => {
     const auctionsData = await fetchAuctions.get()
     const auctions = auctionsData.data()
     const data = req.body.data
+    const productCurrentPrice = {currentPrice: data.startPrice}
     auctions['auctions'].push(data)
     await firestore.collection('auctionsData').doc('auctions').set(auctions)
+    await firestore.collection('currentPrices').doc(`${data.auctionId}`).set(productCurrentPrice)
     res.send('Auction saved successfuly')
   } catch (error) {
     res.status(400).send(error.message)
