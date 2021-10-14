@@ -91,12 +91,48 @@ const fetchProduct = async (req, res) => {
   }
 }
 
+const fetchCurrentPrice = async (req, res) => {
+  try {
+    const productId = req.params.auctionId
+    const catalog = await firestore.collection("currentPrices").doc(productId)
+    const data = await catalog.get()
+    const currentPrice = data.data()
+
+    if (!currentPrice) {
+      res.status(404).send('Product not found')
+    } else {
+      res.send(currentPrice)
+    }
+
+  } catch (error) {
+    res.status(400).send(error.message)
+  }
+}
+
+const modificatedCurrentPrice = async (req, res) => {
+  try {
+    const productId = req.params.auctionId
+    const stepPrice = req.params.stepPrice
+    const catalog = await firestore.collection("currentPrices").doc(productId)
+    const data = await catalog.get()
+    const currentPrice = data.data().currentPrice
+    const newCurrentPrice = Number(currentPrice) - Number(stepPrice)
+    await firestore.collection('currentPrices').doc(productId).set({currentPrice: newCurrentPrice})
+    res.send('Auction saved successfuly')
+
+  } catch (error) {
+    res.status(400).send(error.message)
+  }
+}
+
 module.exports = {
   saveUser,
   fetchCategories,
   addNewAuction,
   loadAuctions,
-  fetchProduct
+  fetchProduct,
+  fetchCurrentPrice,
+  modificatedCurrentPrice
 }
 
 
