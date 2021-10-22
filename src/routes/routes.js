@@ -6,7 +6,10 @@ const {
   loadAuctions,
   fetchProduct,
   fetchCurrentPrice,
-  modificatedCurrentPrice
+  modificatedCurrentPrice,
+  addProfile,
+  fetchProfile
+
 } = require('../controllers/placeController')
 
 const router = express.Router()
@@ -18,6 +21,9 @@ router.get('/fetch-auctions', loadAuctions)
 router.get('/fetch-product/:auctionId', fetchProduct)
 router.get('/fetch-currentPrice/:auctionId', fetchCurrentPrice)
 router.get('/modificated-currentPrice/:auctionId&:stepPrice', modificatedCurrentPrice)
+router.post('/add-profile', addProfile)
+router.get('/fetch-profile/:email', fetchProfile)
+
 
 module.exports = {
   routes: router

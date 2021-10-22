@@ -125,6 +125,36 @@ const modificatedCurrentPrice = async (req, res) => {
   }
 }
 
+const addProfile = async (req, res) => {
+  try {
+    const data = req.body.profile
+    const email = data.email
+    await firestore.collection('profilesData').doc(email).set(data)
+    res.send('Profile saved successfuly')
+  } catch (error) {
+    res.status(400).send(error.message)
+  }
+}
+
+const fetchProfile = async (req, res) => {
+  try {
+    const email = req.params.email
+    const catalog = await firestore.collection("profilesData").doc(email)
+    const data = await catalog.get()
+    const profile = data.data()
+
+
+    if (!profile) {
+      res.status(404).send('Profile not found')
+    } else {
+      res.send(profile)
+    }
+
+  } catch (error) {
+    res.status(400).send(error.message)
+  }
+}
+
 module.exports = {
   saveUser,
   fetchCategories,
@@ -132,10 +162,10 @@ module.exports = {
   loadAuctions,
   fetchProduct,
   fetchCurrentPrice,
-  modificatedCurrentPrice
+  modificatedCurrentPrice,
+  addProfile,
+  fetchProfile
 }
-
-
 
 
 // const updatePhotos = async (req, res) => {
@@ -193,7 +223,6 @@ module.exports = {
 //     res.status(400).send(error.message)
 //   }
 // }
-
 
 
 // const fetchReviews = async (req, res) => {

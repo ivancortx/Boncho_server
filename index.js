@@ -3,7 +3,7 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 const placeRoutes = require('./src/routes/routes')
 const cookieParser = require('cookie-parser')
-const addNewAuctionCheckRole = require('./src/middleware/addNewAuctionCheckRole')
+const addUserCheckRole = require('./src/middleware/addUserCheckRole')
 const fetchCurrentPriceCheckRole = require('./src/middleware/fetchCurrentPriceCheckRole')
 require("dotenv").config()
 
@@ -20,7 +20,8 @@ app.use(cookieParser())
 
 
 
-app.post('api/add-auction', addNewAuctionCheckRole)
+app.post('api/add-auction', addUserCheckRole)
+app.post('api/add-profile', addUserCheckRole)
 app.get('api/fetch-currentPrice/:auctionId', fetchCurrentPriceCheckRole)
 // app.post('/api/add-video', updateContentCheckRole)
 // app.post('/api/add-review', addReviewCheckRole)
