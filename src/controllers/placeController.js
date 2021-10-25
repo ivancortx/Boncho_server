@@ -155,6 +155,25 @@ const fetchProfile = async (req, res) => {
   }
 }
 
+const fetchProductsByCategory = async (req, res) => {
+  try {
+    const category = req.params.category
+    const catalog = await firestore.collection("auctionsData").doc('auctions')
+    const data = await catalog.get()
+    const allProducts = data.data()
+    const products = allProducts.auctions.filter(product => product.category === category)
+
+    if (!products) {
+      res.status(404).send('Products not found')
+    } else {
+      res.send(products)
+    }
+
+  } catch (error) {
+    res.status(400).send(error.message)
+  }
+}
+
 module.exports = {
   saveUser,
   fetchCategories,
@@ -164,7 +183,8 @@ module.exports = {
   fetchCurrentPrice,
   modificatedCurrentPrice,
   addProfile,
-  fetchProfile
+  fetchProfile,
+  fetchProductsByCategory
 }
 
 
