@@ -174,6 +174,45 @@ const fetchProductsByCategory = async (req, res) => {
   }
 }
 
+const updateUserCash = async (req, res) => {
+  try {
+    const cash = req.body.cash
+    const token = await req.cookies.token
+
+    await admin
+        .auth() //определяем какой юзер сделал запрос
+        .verifyIdToken(token)
+        .then((decodedToken) => {
+          const uid = decodedToken.uid
+          firestore.collection("usersData").doc(uid).get()  //получаем БД юзеров
+              .then((data) => {
+                const userData = data.data()
+
+                firestore.collection("usersCash").doc(userData.email).get()  //Ищем в БД "кошелек" по емейлу
+                    .then((data) => {
+                      const userCashData = data.data()
+                      if (userCashData === undefined) {     // если у юзера еще нет "кошелька" то создадим его
+                        firestore.collection('usersCash').doc(userData.email).set({cash: cash})
+                      } else {             //если "кошелек" есть то изменим его значение
+                        const totalCash = userCashData.cash + cash
+
+                        firestore.collection('usersCash').doc(userData.email).set({cash: totalCash})
+                            .then((data) => {
+                              res.send({cash: totalCash})
+
+                            })
+                      }
+                    })
+              })
+        })
+
+  } catch
+      (error) {
+    res.status(400).send(error.message)
+  }
+}
+
+
 module.exports = {
   saveUser,
   fetchCategories,
@@ -184,7 +223,8 @@ module.exports = {
   modificatedCurrentPrice,
   addProfile,
   fetchProfile,
-  fetchProductsByCategory
+  fetchProductsByCategory,
+  updateUserCash
 }
 
 

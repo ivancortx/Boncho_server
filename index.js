@@ -18,13 +18,11 @@ app.use(bodyParser.json())
 app.use(cookieParser())
 
 
-
-
 app.post('api/add-auction', addUserCheckRole)
 app.post('api/add-profile', addUserCheckRole)
 app.get('api/fetch-currentPrice/:auctionId', fetchCurrentPriceCheckRole)
-// app.post('/api/add-video', updateContentCheckRole)
-// app.post('/api/add-review', addReviewCheckRole)
+app.post('api/update-user-cash', addUserCheckRole)
+
 
 app.use('/api', placeRoutes.routes)
 
