@@ -111,8 +111,25 @@ const fetchCurrentPrice = async (req, res) => {
 
 const modificatedCurrentPrice = async (req, res) => {
   try {
+    const token = await req.cookies.token
     const productId = req.params.auctionId
     const stepPrice = req.params.stepPrice
+    const seePrice = req.params.seePrice
+
+    await admin   //снимаем с кошелька деньги за просмотр
+        .auth()   //определяем какой юзер сделал запрос
+        .verifyIdToken(token)
+        .then((decodedToken) => {
+          const email = decodedToken.email
+
+          firestore.collection("usersCash").doc(email).get()
+              .then(data => {
+                const cash = data.data()
+                console.log(typeof cash.cash, typeof stepPrice)
+                firestore.collection('usersCash').doc(email).set({cash: cash.cash - Number(seePrice)})
+              })
+        })
+
     const catalog = await firestore.collection("currentPrices").doc(productId)
     const data = await catalog.get()
     const currentPrice = data.data().currentPrice
@@ -161,14 +178,17 @@ const fetchProductsByCategory = async (req, res) => {
     const catalog = await firestore.collection("auctionsData").doc('auctions')
     const data = await catalog.get()
     const allProducts = data.data()
-    const products = allProducts.auctions.filter(product => product.category === category)
-
-    if (!products) {
-      res.status(404).send('Products not found')
+    if (category === 'all') {
+      res.send(allProducts.auctions)
     } else {
-      res.send(products)
-    }
 
+      const products = allProducts.auctions.filter(product => product.category === category)
+      if (!products) {
+        res.status(404).send('Products not found')
+      } else {
+        res.send(products)
+      }
+    }
   } catch (error) {
     res.status(400).send(error.message)
   }
@@ -212,6 +232,42 @@ const updateUserCash = async (req, res) => {
   }
 }
 
+const fetchUserCash = async (req, res) => {
+  try {
+    const email = req.body.email
+    const token = await req.cookies.token
+
+    await admin
+        .auth() //определяем какой юзер сделал запрос
+        .verifyIdToken(token)
+        .then((decodedToken) => {
+              const uid = decodedToken.uid
+              firestore.collection("usersData").doc(uid).get()  //получаем БД юзеров
+                  .then((data) => {
+                    const userData = data.data()
+
+                    if (userData.email === email) {    //проверяем на валидность email юзера
+
+                      firestore.collection("usersCash").doc(userData.email).get()  //Ищем в БД "кошелек" по емейлу
+                          .then((data) => {
+                            const userCashData = data.data()
+                            if (userCashData === undefined) {     // если у юзера еще нет "кошелька" то создадим его
+                              firestore.collection('usersCash').doc(userData.email).set({cash: 0})
+                              res.send({cash: 0})
+                            } else {             //если "кошелек" есть то отправим его значение
+                              res.send(userCashData)
+                            }
+                          })
+                    }
+                  })
+            }
+        )
+  } catch
+      (error) {
+    res.status(400).send(error.message)
+  }
+}
+
 
 module.exports = {
   saveUser,
@@ -224,7 +280,8 @@ module.exports = {
   addProfile,
   fetchProfile,
   fetchProductsByCategory,
-  updateUserCash
+  updateUserCash,
+  fetchUserCash
 }
 
 

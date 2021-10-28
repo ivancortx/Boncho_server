@@ -22,6 +22,7 @@ app.post('api/add-auction', addUserCheckRole)
 app.post('api/add-profile', addUserCheckRole)
 app.get('api/fetch-currentPrice/:auctionId', fetchCurrentPriceCheckRole)
 app.post('api/update-user-cash', addUserCheckRole)
+app.post('api/fetch-user-cash', addUserCheckRole)
 
 
 app.use('/api', placeRoutes.routes)

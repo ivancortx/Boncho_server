@@ -9,7 +9,7 @@ const fetchCurrentPriceCheckRole = async(req, res, next) => {
       .then((decodedToken) => {
         const uid = decodedToken.uid
         if (uid) next()
-
+        console.log(uid)
       })
       .catch((error) => {
         // Handle error
