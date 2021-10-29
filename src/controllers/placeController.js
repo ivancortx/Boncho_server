@@ -125,7 +125,6 @@ const modificatedCurrentPrice = async (req, res) => {
           firestore.collection("usersCash").doc(email).get()
               .then(data => {
                 const cash = data.data()
-                console.log(typeof cash.cash, typeof stepPrice)
                 firestore.collection('usersCash').doc(email).set({cash: cash.cash - Number(seePrice)})
               })
         })
@@ -219,7 +218,6 @@ const updateUserCash = async (req, res) => {
                         firestore.collection('usersCash').doc(userData.email).set({cash: totalCash})
                             .then((data) => {
                               res.send({cash: totalCash})
-
                             })
                       }
                     })
@@ -268,6 +266,72 @@ const fetchUserCash = async (req, res) => {
   }
 }
 
+const buyProduct = async (req, res) => {
+  try {
+    const currentPrice = req.body.currentPrice
+    const productData = req.body.productData
+    const userData = req.body.userData
+    const token = await req.cookies.token
+
+    productData.isBuy = true
+    productData.buyPrice = currentPrice
+
+
+    await admin
+        .auth() //определяем какой юзер сделал запрос
+        .verifyIdToken(token)
+        .then((decodedToken) => {
+              const uid = decodedToken.uid
+              firestore.collection("usersData").doc(uid).get()  //получаем БД юзеров
+                  .then((data) => {
+                    const userDataByDecodeToken = data.data()
+
+                    if (userDataByDecodeToken.email === userData.email) {    //проверяем на валидность юзера
+
+                      firestore.collection("usersCash").doc(userData.email).get()  //Ищем в БД "кошелек" по емейлу
+                          .then((data) => {
+                            const userCashData = data.data()
+                            if (userCashData.cash >= Number(currentPrice)) {     // проверим что у юзера достаточно денег
+                              productData.isBuy = true
+                              productData.buyPrice = currentPrice
+                              productData.isSend = false
+                              productData.delivered = false
+                              const userCashAfterBuy = userCashData.cash - Number(currentPrice)
+                              firestore.collection("usersCash").doc(userData.email).set({cash: userCashAfterBuy}) //уменьшаем сумму в кошельке
+                              firestore.collection('buyData').doc(productData.auctionId).set(productData)
+                              firestore.collection('auctionsData').doc('auctions').get()
+                                  .then((data) => {
+                                    const auctions = data.data()
+                                    const newAuctions = auctions.auctions.map((auc) => {
+                                      if (auc.auctionId === productData.auctionId) {
+                                        auc.isInStock = false
+                                        return auc
+                                      }
+                                      return auc
+                                    })
+                                    firestore.collection('auctionsData').doc('auctions')
+                                        .set({auctions: newAuctions})
+                                        .then(setTimeout(() => {
+                                          res.send({status: 'good'})
+                                        }, 1000))
+                                  })
+
+                            } else {             //если "кошелек" есть то отправим его значение
+                              res.status(400).send('Недостаточно денег')
+                            }
+                          })
+                    } else {
+                      res.status(400).send('Пользователь не валидный')
+                    }
+                  })
+            }
+        )
+  } catch
+      (error) {
+    res.status(400).send(error.message)
+  }
+}
+
 
 module.exports = {
   saveUser,
@@ -281,7 +345,8 @@ module.exports = {
   fetchProfile,
   fetchProductsByCategory,
   updateUserCash,
-  fetchUserCash
+  fetchUserCash,
+  buyProduct
 }
 
 

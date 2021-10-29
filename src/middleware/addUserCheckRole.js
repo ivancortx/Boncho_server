@@ -14,7 +14,6 @@ const addUserCheckRole = async(req, res, next) => {
 
         admins.filter(item => {
           if (item.uid === uid) {
-            console.log(uid, item)
             next()
           }
         })
