@@ -13,7 +13,7 @@ const app = express()
 const PORT = 5000
 
 app.use(express.json())
-app.use(cors({credentials: true, origin: 'http://localhost:3000'}))
+app.use(cors({credentials: true, origin: 'https://shop-6d93c.web.app/'}))
 app.use(bodyParser.json())
 app.use(cookieParser())
 
