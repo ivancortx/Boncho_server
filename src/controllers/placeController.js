@@ -6,7 +6,7 @@ const saveUser = async (req, res) => {
   try {
     const adminsQueryDocument = await firestore.collection("admins").doc('admins').get()
     const admins = await adminsQueryDocument.data().admin
-    const token = await req.cookies.token
+    const token = await req.headers.token
     const decodeValue = await admin.auth().verifyIdToken(token)
     const userId = decodeValue.uid
 
@@ -111,7 +111,7 @@ const fetchCurrentPrice = async (req, res) => {
 
 const modificatedCurrentPrice = async (req, res) => {
   try {
-    const token = await req.cookies.token
+    const token = await req.headers.token
     const productId = req.params.auctionId
     const stepPrice = req.params.stepPrice
     const seePrice = req.params.seePrice
@@ -196,7 +196,7 @@ const fetchProductsByCategory = async (req, res) => {
 const updateUserCash = async (req, res) => {
   try {
     const cash = req.body.cash
-    const token = await req.cookies.token
+    const token = await req.headers.token
 
     await admin
         .auth() //определяем какой юзер сделал запрос
@@ -233,7 +233,7 @@ const updateUserCash = async (req, res) => {
 const fetchUserCash = async (req, res) => {
   try {
     const email = req.body.email
-    const token = await req.cookies.token
+    const token = await req.headers.token
 
     await admin
         .auth() //определяем какой юзер сделал запрос
@@ -271,7 +271,7 @@ const buyProduct = async (req, res) => {
     const currentPrice = req.body.currentPrice
     const productData = req.body.productData
     const userData = req.body.userData
-    const token = await req.cookies.token
+    const token = await req.headers.token
 
     productData.isBuy = true
     productData.buyPrice = currentPrice

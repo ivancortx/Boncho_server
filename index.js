@@ -12,7 +12,7 @@ const app = express()
 const PORT = 5000
 
 app.use(express.json())
-app.use(cors({credentials: true, origin: 'https://boncho-client.herokuapp.com'}))
+app.use(cors())
 app.use(bodyParser.json())
 app.use(cookieParser())
 
