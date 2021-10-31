@@ -7,7 +7,6 @@ const addUserCheckRole = require('./src/middleware/addUserCheckRole')
 const fetchCurrentPriceCheckRole = require('./src/middleware/fetchCurrentPriceCheckRole')
 require("dotenv").config()
 
-// const addReviewCheckRole = require('./src/middleware/addReviewCheckRole')
 const app = express()
 
 const PORT = 5000
@@ -16,9 +15,6 @@ app.use(express.json())
 app.use(cors({credentials: true, origin: 'https://shop-6d93c.web.app/'}))
 app.use(bodyParser.json())
 app.use(cookieParser())
-
-
-
 
 app.post('api/add-auction', addUserCheckRole)
 app.post('api/add-profile', addUserCheckRole)
