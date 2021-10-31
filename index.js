@@ -18,6 +18,8 @@ app.use(bodyParser.json())
 app.use(cookieParser())
 
 
+
+
 app.post('api/add-auction', addUserCheckRole)
 app.post('api/add-profile', addUserCheckRole)
 app.get('api/fetch-currentPrice/:auctionId', fetchCurrentPriceCheckRole)
