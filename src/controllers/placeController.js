@@ -3,10 +3,11 @@ const admin = require('../config/firebase-config')
 const firestore = admin.firestore()
 
 const saveUser = async (req, res) => {
+  console.log(req.body)
   try {
     const adminsQueryDocument = await firestore.collection("admins").doc('admins').get()
     const admins = await adminsQueryDocument.data().admin
-    const token = await req.headers.token
+    const token = await req.body.token
     const decodeValue = await admin.auth().verifyIdToken(token)
     const userId = decodeValue.uid
 
