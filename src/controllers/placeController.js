@@ -3,7 +3,6 @@ const admin = require('../config/firebase-config')
 const firestore = admin.firestore()
 
 const saveUser = async (req, res) => {
-  console.log(req.body)
   try {
     const adminsQueryDocument = await firestore.collection("admins").doc('admins').get()
     const admins = await adminsQueryDocument.data().admin
@@ -112,7 +111,7 @@ const fetchCurrentPrice = async (req, res) => {
 
 const modificatedCurrentPrice = async (req, res) => {
   try {
-    const token = await req.headers.token
+    const token = req.headers.token
     const productId = req.params.auctionId
     const stepPrice = req.params.stepPrice
     const seePrice = req.params.seePrice
@@ -197,7 +196,7 @@ const fetchProductsByCategory = async (req, res) => {
 const updateUserCash = async (req, res) => {
   try {
     const cash = req.body.cash
-    const token = await req.headers.token
+    const token = await req.body.token
 
     await admin
         .auth() //определяем какой юзер сделал запрос
@@ -234,7 +233,7 @@ const updateUserCash = async (req, res) => {
 const fetchUserCash = async (req, res) => {
   try {
     const email = req.body.email
-    const token = await req.headers.token
+    const token = await req.body.token
 
     await admin
         .auth() //определяем какой юзер сделал запрос
@@ -272,7 +271,7 @@ const buyProduct = async (req, res) => {
     const currentPrice = req.body.currentPrice
     const productData = req.body.productData
     const userData = req.body.userData
-    const token = await req.headers.token
+    const token = await req.body.token
 
     productData.isBuy = true
     productData.buyPrice = currentPrice
