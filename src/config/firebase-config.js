@@ -4,7 +4,7 @@ const serviceAccount = require("./serviceAccount.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: 'https://shop.firebaseio.com'
+  databaseURL: 'https://holiday-studio.firebaseio.com'
 });
 
 module.exports = admin
