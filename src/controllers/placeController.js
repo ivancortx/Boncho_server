@@ -4,7 +4,7 @@ const firestore = admin.firestore()
 
 const saveUser = async (req, res) => {
   try {
-    const adminsQueryDocument = await firestore.collection("admins").doc('admins').get()
+    const adminsQueryDocument = await firestore.collection('admins').doc('admins').get()
     const admins = await adminsQueryDocument.data().admin
     const token = await req.body.token
     const decodeValue = await admin.auth().verifyIdToken(token)
@@ -13,20 +13,20 @@ const saveUser = async (req, res) => {
     const newAdmin = admins.filter(item => item.email === decodeValue.email)
     if (newAdmin[0]) {
       if (newAdmin[0].email === decodeValue.email) {
-        decodeValue["roles"] = ["user", "admin"]
+        decodeValue['roles'] = ['user', 'admin']
       }
-    } else decodeValue["roles"] = ["user"]
-    await firestore.collection("usersData").doc(userId).set(decodeValue)
+    } else decodeValue['roles'] = ['user']
+    await firestore.collection('usersData').doc(userId).set(decodeValue)
     return res.json(decodeValue)
   } catch (e) {
-    return res.json({message: 'Internal Error'})
+    return res.json({ message: 'Internal Error' })
   }
 }
 
 
 const fetchCategories = async (req, res) => {
   try {
-    const catalog = await firestore.collection("productsCategory").doc('categories')
+    const catalog = await firestore.collection('productsCategory').doc('categories')
     const data = await catalog.get()
 
     if (!data.exists) {
@@ -42,11 +42,11 @@ const fetchCategories = async (req, res) => {
 
 const addNewAuction = async (req, res) => {
   try {
-    const fetchAuctions = await firestore.collection("auctionsData").doc('auctions')
+    const fetchAuctions = await firestore.collection('auctionsData').doc('auctions')
     const auctionsData = await fetchAuctions.get()
     const auctions = auctionsData.data()
     const data = req.body.data
-    const productCurrentPrice = {currentPrice: data.startPrice}
+    const productCurrentPrice = { currentPrice: data.startPrice }
     auctions['auctions'].push(data)
     await firestore.collection('auctionsData').doc('auctions').set(auctions)
     await firestore.collection('currentPrices').doc(`${data.auctionId}`).set(productCurrentPrice)
@@ -58,7 +58,7 @@ const addNewAuction = async (req, res) => {
 
 const loadAuctions = async (req, res) => {
   try {
-    const catalog = await firestore.collection("auctionsData").doc('auctions')
+    const catalog = await firestore.collection('auctionsData').doc('auctions')
     const data = await catalog.get()
 
     if (!data.exists) {
@@ -75,7 +75,7 @@ const loadAuctions = async (req, res) => {
 const fetchProduct = async (req, res) => {
   try {
     const productId = req.params.auctionId
-    const catalog = await firestore.collection("auctionsData").doc('auctions')
+    const catalog = await firestore.collection('auctionsData').doc('auctions')
     const data = await catalog.get()
     const productsArray = data.data().auctions
     const productData = productsArray.filter(product => product.auctionId === productId)
@@ -94,7 +94,7 @@ const fetchProduct = async (req, res) => {
 const fetchCurrentPrice = async (req, res) => {
   try {
     const productId = req.params.auctionId
-    const catalog = await firestore.collection("currentPrices").doc(productId)
+    const catalog = await firestore.collection('currentPrices').doc(productId)
     const data = await catalog.get()
     const currentPrice = data.data()
 
@@ -119,15 +119,15 @@ const modificatedCurrentPrice = async (req, res) => {
     const decodedToken = await admin.auth().verifyIdToken(token) //определяем какой юзер сделал запрос
     const email = decodedToken.email
 
-    const userData = await firestore.collection("usersCash").doc(email).get()  //снимаем с кошелька сумупокупки
+    const userData = await firestore.collection('usersCash').doc(email).get()  //снимаем с кошелька сумупокупки
     const cash = userData.data()
-    await firestore.collection('usersCash').doc(email).set({cash: cash.cash - Number(seePrice)})
+    await firestore.collection('usersCash').doc(email).set({ cash: cash.cash - Number(seePrice) })
 
-    const catalog = await firestore.collection("currentPrices").doc(productId)
+    const catalog = await firestore.collection('currentPrices').doc(productId)
     const data = await catalog.get()
     const currentPrice = data.data().currentPrice
     const newCurrentPrice = Number(currentPrice) - Number(stepPrice)
-    await firestore.collection('currentPrices').doc(productId).set({currentPrice: newCurrentPrice})
+    await firestore.collection('currentPrices').doc(productId).set({ currentPrice: newCurrentPrice })
     res.send('Auction saved successfuly')
 
   } catch (error) {
@@ -149,7 +149,7 @@ const addProfile = async (req, res) => {
 const fetchProfile = async (req, res) => {
   try {
     const email = req.params.email
-    const catalog = await firestore.collection("profilesData").doc(email)
+    const catalog = await firestore.collection('profilesData').doc(email)
     const data = await catalog.get()
     const profile = data.data()
 
@@ -167,7 +167,7 @@ const fetchProfile = async (req, res) => {
 const fetchProductsByCategory = async (req, res) => {
   try {
     const category = req.params.category
-    const catalog = await firestore.collection("auctionsData").doc('auctions')
+    const catalog = await firestore.collection('auctionsData').doc('auctions')
     const data = await catalog.get()
     const allProducts = data.data()
     if (category === 'all') {
@@ -194,22 +194,22 @@ const updateUserCash = async (req, res) => {
     const decodedToken = await admin.auth().verifyIdToken(token) //определяем какой юзер сделал запрос
     const uid = decodedToken.uid
 
-    const userDataHash = await firestore.collection("usersData").doc(uid).get()  //получаем БД юзеров
+    const userDataHash = await firestore.collection('usersData').doc(uid).get()  //получаем БД юзеров
     const userData = userDataHash.data()
 
-    const userCash = await firestore.collection("usersCash").doc(userData.email).get()  //Ищем в БД "кошелек" по емейлу
+    const userCash = await firestore.collection('usersCash').doc(userData.email).get()  //Ищем в БД "кошелек" по емейлу
     const userCashData = userCash.data()
 
     if (userCashData === undefined) {     // если у юзера еще нет "кошелька" то создадим его
-      await firestore.collection('usersCash').doc(userData.email).set({cash: cash})
+      await firestore.collection('usersCash').doc(userData.email).set({ cash: cash })
     } else {             //если "кошелек" есть то изменим его значение
       const totalCash = userCashData.cash + cash
-      await firestore.collection('usersCash').doc(userData.email).set({cash: totalCash})
-      res.send({cash: totalCash})
+      await firestore.collection('usersCash').doc(userData.email).set({ cash: totalCash })
+      res.send({ cash: totalCash })
     }
 
   } catch
-      (error) {
+    (error) {
     res.status(400).send(error.message)
   }
 }
@@ -222,22 +222,22 @@ const fetchUserCash = async (req, res) => {
     const decodedToken = await admin.auth().verifyIdToken(token) //определяем какой юзер сделал запрос
     const uid = decodedToken.uid
 
-    const userDataHash = await firestore.collection("usersData").doc(uid).get()  //получаем БД юзеров
+    const userDataHash = await firestore.collection('usersData').doc(uid).get()  //получаем БД юзеров
     const userData = userDataHash.data()
 
     if (userData.email === email) {    //проверяем на валидность email юзера
-      const userCash = await firestore.collection("usersCash").doc(userData.email).get()  //Ищем в БД "кошелек" по емейлу
+      const userCash = await firestore.collection('usersCash').doc(userData.email).get()  //Ищем в БД "кошелек" по емейлу
       const userCashData = userCash.data()
 
       if (userCashData === undefined) {     // если у юзера еще нет "кошелька" то создадим его
-        await firestore.collection('usersCash').doc(userData.email).set({cash: 0})
-        res.send({cash: 0})
+        await firestore.collection('usersCash').doc(userData.email).set({ cash: 0 })
+        res.send({ cash: 0 })
       } else {             //если "кошелек" есть то отправим его значение
         res.send(userCashData)
       }
     }
   } catch
-      (error) {
+    (error) {
     res.status(400).send(error.message)
   }
 }
@@ -255,11 +255,11 @@ const buyProduct = async (req, res) => {
     const decodeToken = await admin.auth().verifyIdToken(token) //определяем какой юзер сделал запрос
     const uid = decodeToken.uid
 
-    const userDataHash = await firestore.collection("usersData").doc(uid).get()  //получаем БД юзеров
+    const userDataHash = await firestore.collection('usersData').doc(uid).get()  //получаем БД юзеров
     const userDataByDecodeToken = userDataHash.data()
 
     if (userDataByDecodeToken.email === userData.email) {    //проверяем на валидность юзера
-      const userDataCash = await firestore.collection("usersCash").doc(userData.email).get()  //Ищем в БД "кошелек" по емейлу
+      const userDataCash = await firestore.collection('usersCash').doc(userData.email).get()  //Ищем в БД "кошелек" по емейлу
       const userCashData = userDataCash.data()
 
       if (userCashData.cash >= Number(currentPrice)) {     // проверим что у юзера достаточно денег
@@ -268,8 +268,16 @@ const buyProduct = async (req, res) => {
         productData.isSend = false
         productData.delivered = false
         const userCashAfterBuy = userCashData.cash - Number(currentPrice)
-        await firestore.collection("usersCash").doc(userData.email).set({cash: userCashAfterBuy}) //уменьшаем сумму в кошельке
+        await firestore.collection('usersCash').doc(userData.email).set({ cash: userCashAfterBuy }) //уменьшаем сумму в кошельке
         await firestore.collection('buyData').doc(productData.auctionId).set(productData)
+
+        const userCartData = await firestore.collection('cartsData').doc(userData.email).get()  //получаем данные корзины
+        let userCart = userCartData.data()
+        if (userCart !== undefined) {
+          userCart.auctions.push(productData)
+        } else userCart = {auctions: [productData]}
+
+        await firestore.collection('cartsData').doc(userData.email).set(userCart)  //добавляем товар в корзину
 
         const auctionsData = await firestore.collection('auctionsData').doc('auctions').get()
         const auctions = auctionsData.data()
@@ -281,8 +289,8 @@ const buyProduct = async (req, res) => {
           return auc
         })
 
-        await firestore.collection('auctionsData').doc('auctions').set({auctions: newAuctions})
-        res.send({status: 'good'})
+        await firestore.collection('auctionsData').doc('auctions').set({ auctions: newAuctions })
+        res.send({ status: 'good' })
 
       } else {
         res.status(400).send('Недостаточно денег')
@@ -293,7 +301,22 @@ const buyProduct = async (req, res) => {
     }
 
   } catch
-      (error) {
+    (error) {
+    res.status(400).send(error.message)
+  }
+}
+
+const fetchItemsInCart = async (req, res) => {
+  try {
+    const token = req.headers.token
+    const decodedToken = await admin.auth().verifyIdToken(token) //определяем какой юзер сделал запрос
+    const email = decodedToken.email
+
+    const itemsData = await firestore.collection('cartsData').doc(email).get()  //Находим корзину по email
+    const cartData = itemsData.data()
+    res.send(cartData)
+
+  } catch (error) {
     res.status(400).send(error.message)
   }
 }
@@ -312,5 +335,6 @@ module.exports = {
   fetchProductsByCategory,
   updateUserCash,
   fetchUserCash,
-  buyProduct
+  buyProduct,
+  fetchItemsInCart
 }

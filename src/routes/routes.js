@@ -12,7 +12,8 @@ const {
   fetchProductsByCategory,
   updateUserCash,
   fetchUserCash,
-  buyProduct
+  buyProduct,
+  fetchItemsInCart
 } = require('../controllers/placeController')
 
 const router = express.Router()
@@ -30,6 +31,7 @@ router.get('/fetch-products-by-category/:category', fetchProductsByCategory)
 router.post('/update-user-cash', updateUserCash)
 router.post('/fetch-user-cash', fetchUserCash)
 router.post('/buy-product', buyProduct)
+router.get('/fetch-items-in-cart', fetchItemsInCart)
 
 module.exports = {
   routes: router
