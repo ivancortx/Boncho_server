@@ -321,6 +321,51 @@ const fetchItemsInCart = async (req, res) => {
   }
 }
 
+const writeDeliveryData = async (req, res) => {
+  try {
+    const token = req.body.token
+    const deliveryInfo = req.body.deliveryData
+    const productDataInfo = req.body.productData
+
+    const decodedToken = await admin.auth().verifyIdToken(token) //определяем какой юзер сделал запрос
+    const userEmail = decodedToken.email
+
+    const deliveryData = {
+      productName: productDataInfo.productName,
+      productId: productDataInfo.auctionId,
+      userName: deliveryInfo.name,
+      surName: deliveryInfo.surname,
+      tel: deliveryInfo.tel,
+      region: deliveryInfo.region,
+      city: deliveryInfo.city,
+      email:userEmail
+    }
+
+    //------Добавление в ожидающие посылки------//
+    const deliveriesByEmail = await firestore.collection('waitingToSendProducts').doc(userEmail).get()  //Находим корзину по email
+    if (deliveriesByEmail.data() === undefined) {
+      await firestore.collection('waitingToSendProducts').doc(userEmail).set({products: [deliveryData]})
+    } else {
+      let deliveryDataFetching = deliveriesByEmail.data()
+      deliveryDataFetching.products.push(deliveryData)
+      await firestore.collection('waitingToSendProducts').doc(userEmail).set(deliveryDataFetching)
+    }
+
+    //------Удаление товара с корзины юзера------//
+    const productsInCartData = await firestore.collection('cartsData').doc(userEmail).get()
+    const productsInCart = productsInCartData.data()
+    const productInCartFiltered = productsInCart.auctions.filter(auc => {
+      if (auc.auctionId === deliveryData.productId) {
+        return false
+      } else return true
+    })
+    await firestore.collection('cartsData').doc(userEmail).set({auctions: productInCartFiltered })
+    res.status(200).send('OK')
+  } catch (error) {
+    res.status(400).send(error.message)
+  }
+}
+
 
 module.exports = {
   saveUser,
@@ -336,5 +381,6 @@ module.exports = {
   updateUserCash,
   fetchUserCash,
   buyProduct,
-  fetchItemsInCart
+  fetchItemsInCart,
+  writeDeliveryData
 }
