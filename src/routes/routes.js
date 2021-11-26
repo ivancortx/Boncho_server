@@ -14,7 +14,8 @@ const {
   fetchUserCash,
   buyProduct,
   fetchItemsInCart,
-  writeDeliveryData
+  writeDeliveryData,
+  fetchWaitingToSendProducts
 } = require('../controllers/placeController')
 
 const router = express.Router()
@@ -34,6 +35,7 @@ router.post('/fetch-user-cash', fetchUserCash)
 router.post('/buy-product', buyProduct)
 router.get('/fetch-items-in-cart', fetchItemsInCart)
 router.post('/send-delivery-data', writeDeliveryData)
+router.get('/fetch-waiting-deliveries', fetchWaitingToSendProducts)
 
 module.exports = {
   routes: router

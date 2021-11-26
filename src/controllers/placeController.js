@@ -333,6 +333,8 @@ const writeDeliveryData = async (req, res) => {
     const deliveryData = {
       productName: productDataInfo.productName,
       productId: productDataInfo.auctionId,
+      productDescription: productDataInfo.description,
+      productImages: productDataInfo.photoUrlsData,
       userName: deliveryInfo.name,
       surName: deliveryInfo.surname,
       tel: deliveryInfo.tel,
@@ -366,6 +368,24 @@ const writeDeliveryData = async (req, res) => {
   }
 }
 
+const fetchWaitingToSendProducts = async (req, res) => {
+  try {
+    const token = req.headers.token
+    const decodedToken = await admin.auth().verifyIdToken(token) //определяем какой юзер сделал запрос
+    const userEmail = decodedToken.email
+
+    //------Подгрузка ожидающих посылок------//
+    const waitingDeliveriesByEmail = await firestore.collection('waitingToSendProducts').doc(userEmail).get()  //Находим корзину по email
+    if (waitingDeliveriesByEmail.data() === undefined) {
+      res.status(200).send('Waiting deliveries absent')
+    } else {
+      res.status(200).send(waitingDeliveriesByEmail.data())
+    }
+  } catch (error) {
+    res.status(400).send(error.message)
+  }
+}
+
 
 module.exports = {
   saveUser,
@@ -382,5 +402,6 @@ module.exports = {
   fetchUserCash,
   buyProduct,
   fetchItemsInCart,
-  writeDeliveryData
+  writeDeliveryData,
+  fetchWaitingToSendProducts
 }
