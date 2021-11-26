@@ -275,7 +275,7 @@ const buyProduct = async (req, res) => {
         let userCart = userCartData.data()
         if (userCart !== undefined) {
           userCart.auctions.push(productData)
-        } else userCart = {auctions: [productData]}
+        } else userCart = { auctions: [productData] }
 
         await firestore.collection('cartsData').doc(userData.email).set(userCart)  //добавляем товар в корзину
 
@@ -340,13 +340,13 @@ const writeDeliveryData = async (req, res) => {
       tel: deliveryInfo.tel,
       region: deliveryInfo.region,
       city: deliveryInfo.city,
-      email:userEmail
+      email: userEmail
     }
 
     //------Добавление в ожидающие посылки------//
     const deliveriesByEmail = await firestore.collection('waitingToSendProducts').doc(userEmail).get()  //Находим корзину по email
     if (deliveriesByEmail.data() === undefined) {
-      await firestore.collection('waitingToSendProducts').doc(userEmail).set({products: [deliveryData]})
+      await firestore.collection('waitingToSendProducts').doc(userEmail).set({ products: [deliveryData] })
     } else {
       let deliveryDataFetching = deliveriesByEmail.data()
       deliveryDataFetching.products.push(deliveryData)
@@ -361,7 +361,7 @@ const writeDeliveryData = async (req, res) => {
         return false
       } else return true
     })
-    await firestore.collection('cartsData').doc(userEmail).set({auctions: productInCartFiltered })
+    await firestore.collection('cartsData').doc(userEmail).set({ auctions: productInCartFiltered })
     res.status(200).send('OK')
   } catch (error) {
     res.status(400).send(error.message)
@@ -386,6 +386,33 @@ const fetchWaitingToSendProducts = async (req, res) => {
   }
 }
 
+const fetchAllWaitingToSendProducts = async (req, res) => {
+  try {
+    const token = req.headers.token
+    const decodedToken = await admin.auth().verifyIdToken(token) //определяем какой юзер сделал запрос
+    const userEmail = decodedToken.email
+    const adminsQueryDocument = await firestore.collection('admins').doc('admins').get()
+    const admins = await adminsQueryDocument.data().admin
+
+    //------Проверка на наличие прав админа------//
+    let isAdmin = false
+    admins.forEach(el => {
+      if (el.email === userEmail) isAdmin = true
+    })
+
+    //------Подгрузка всех ожидающих посылок------//
+    if (isAdmin) {
+      const waitingDeliveriesByEmail = await firestore.collection('waitingToSendProducts').get()  //Находим корзину по email
+      const data = []
+      waitingDeliveriesByEmail.docs.forEach(el => data.push(el.data()))
+      const allDeliveries = []
+      data.forEach(productArr => productArr.products.forEach(el => allDeliveries.push(el)))
+      res.status(200).send(allDeliveries)
+    } else res.status(200).send('you are not an admin')
+  } catch (error) {
+    res.status(400).send(error.message)
+  }
+}
 
 module.exports = {
   saveUser,
@@ -403,5 +430,6 @@ module.exports = {
   buyProduct,
   fetchItemsInCart,
   writeDeliveryData,
-  fetchWaitingToSendProducts
+  fetchWaitingToSendProducts,
+  fetchAllWaitingToSendProducts
 }
