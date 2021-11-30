@@ -432,17 +432,18 @@ const sendDeliveryItemWithDeliveryStatus = async (req, res) => {
     })
 
     //------Подгрузка ожидающих посылок------//
-    const waitingDeliveriesByEmail = await firestore.collection('waitingToSendProducts').doc(userEmail).get()  //Находим корзину по email
+    const waitingDeliveriesByEmail = await firestore.collection('waitingToSendProducts').doc(productData.email).get()  //Находим корзину по email
     const waitingDeliveriesByEmailData = waitingDeliveriesByEmail.data()
 
     if (isAdmin) {
       const data = waitingDeliveriesByEmailData.products.map(el => {
-        if (el.productId === productData.productId) return productData
-        return el
+        if (el.productId === productData.productId) {
+          return productData
+        } else return el
       })
 
       //------Перезапись ожидающих посылок------//
-      await firestore.collection('waitingToSendProducts').doc(userEmail).set({ products: data })
+      await firestore.collection('waitingToSendProducts').doc(productData.email).set({ products: data })
       res.status(200).send('OK')
     }
   } catch (error) {
