@@ -16,7 +16,8 @@ const {
   fetchItemsInCart,
   writeDeliveryData,
   fetchWaitingToSendProducts,
-  fetchAllWaitingToSendProducts
+  fetchAllWaitingToSendProducts,
+  sendDeliveryItemWithDeliveryStatus
 } = require('../controllers/placeController')
 
 const router = express.Router()
@@ -38,6 +39,7 @@ router.get('/fetch-items-in-cart', fetchItemsInCart)
 router.post('/send-delivery-data', writeDeliveryData)
 router.get('/fetch-waiting-deliveries', fetchWaitingToSendProducts)
 router.get('/fetch-all-waiting-deliveries', fetchAllWaitingToSendProducts)
+router.post('/send-delivery-item-with-delivery-status', sendDeliveryItemWithDeliveryStatus)
 
 module.exports = {
   routes: router

@@ -414,6 +414,42 @@ const fetchAllWaitingToSendProducts = async (req, res) => {
   }
 }
 
+const sendDeliveryItemWithDeliveryStatus = async (req, res) => {
+  try {
+    const token = req.body.token
+    const productData = req.body.productData
+
+    const decodedToken = await admin.auth().verifyIdToken(token) //определяем какой юзер сделал запрос
+    const userEmail = decodedToken.email
+
+    const adminsQueryDocument = await firestore.collection('admins').doc('admins').get()
+    const admins = await adminsQueryDocument.data().admin
+
+    //------Проверка на наличие прав админа------//
+    let isAdmin = false
+    admins.forEach(el => {
+      if (el.email === userEmail) isAdmin = true
+    })
+
+    //------Подгрузка ожидающих посылок------//
+    const waitingDeliveriesByEmail = await firestore.collection('waitingToSendProducts').doc(userEmail).get()  //Находим корзину по email
+    const waitingDeliveriesByEmailData = waitingDeliveriesByEmail.data()
+
+    if (isAdmin) {
+      const data = waitingDeliveriesByEmailData.products.map(el => {
+        if (el.productId === productData.productId) return productData
+        return el
+      })
+
+      //------Перезапись ожидающих посылок------//
+      await firestore.collection('waitingToSendProducts').doc(userEmail).set({ products: data })
+      res.status(200).send('OK')
+    }
+  } catch (error) {
+    res.status(400).send(error.message)
+  }
+}
+
 module.exports = {
   saveUser,
   fetchCategories,
@@ -431,5 +467,6 @@ module.exports = {
   fetchItemsInCart,
   writeDeliveryData,
   fetchWaitingToSendProducts,
-  fetchAllWaitingToSendProducts
+  fetchAllWaitingToSendProducts,
+  sendDeliveryItemWithDeliveryStatus
 }
